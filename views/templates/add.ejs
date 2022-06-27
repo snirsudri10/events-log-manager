@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/js/bootstrap.min.js"></script>
+    <title>יומן הטסה</title>
+    <script src="/js/socket.io.js"></script>
+    <script src="/js/jQuery.min.js"></script>
+</head>
+
+<body>
+    <div class="container fluid-container">
+        <nav class="navbar navbar-dark bg-dark">
+            <div class="container-fluid" dir="rtl">
+                <a class="navbar-brand " href="#">
+                    <img onclick="toggleDarkMode()" src="/images/116.png" alt="" width="35" height="35" class="d-inline-block align-text-top">יומן הטסה
+                </a>
+                <a href="/" class="btn btn-dark" style="cursor: pointer; color: white;">דף הבית</a>
+            </div>
+        </nav>
+        <br>
+        <form action="/templates/addTemp/" onsubmit="" method="post">
+            <div class="input-group mb-3">
+                <input required type="text" class="form-control" name="temp[title]" value="" placeholder="שם השבלונה">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">שם השבלונה</span>
+                </div>
+            </div>
+            <div class="input-group mb-3">
+                <input required type="text" class="form-control" name="temp[from]" value="" placeholder="מאת">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">מאת</span>
+                </div>
+            </div>
+            <div class="input-group mb-3">
+                <input required type="text" class="form-control" name="temp[to]" value="" placeholder="אל">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">אל</span>
+                </div>
+            </div>
+            <div class="input-group mb-3">
+                <input required type="text" class="form-control" name="temp[body]" value="" placeholder="תוכן">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">תוכן</span>
+                </div>
+            </div>
+            <div class="input-group mb-3">
+                <input required type="text" class="form-control" name="temp[state]" value="" placeholder="טיפול">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">טיפול</span>
+                </div>
+            </div>
+            <div class="input-group mb-3" style="direction: rtl;">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">סגירת יום</span>
+                </div>
+                <select required name="temp[dayClosure]" id="">
+                    <option value="yes">כן</option>
+                    <option value="no">לא</option>
+                </select>
+            </div>
+            <div class="input-group mb-3"  style="direction: rtl;">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">צבע</span>
+                </div>
+                <select required tabindex="6" name="temp[color]">
+                        <option value="#d82e3f">🟥</option>
+                        <option value="#c4aa16">🟨</option>
+                        <option value="#1d8d20">🟩</option>
+                </select>                
+
+            </div>
+            <div class="center">
+
+                <button class="btn btn-primary">שמירה</button>
+
+            </div>
+        </form>
+    </div>
+
+    <script>
+
+        const socket = io("http://localhost:3000");
+
+        var darkMode = true;
+
+        function toggleDarkMode() {
+            if (darkMode) {
+                $("button").removeClass("btn-dark").addClass("btn-primary");
+                $("nav").removeClass("navbar-dark bg-dark").addClass("navbar-light bg-light");
+                $("table").removeClass("table-dark");
+                $("body").css({ "background-color": "white" });
+                $("#dateCalander").removeClass("dateCalendarDarkMode").addClass("dateCalendar");
+                $("#dateCalander").removeClass("dateCalendarDarkMode").addClass("dateCalendar");
+                $("#templates").removeClass("templatesDivDarkMode").addClass("templatesDiv");
+                darkMode = false;
+            } else {
+                $("button").addClass("btn-dark").removeClass("btn-primary");
+                $("nav").addClass("navbar-dark bg-dark").removeClass("navbar-light bg-light");
+                $("table").addClass("table-dark");
+                $("body").css({ "background-color": "#2b2e31" });
+                $("#dateCalander").addClass("dateCalendarDarkMode").removeClass("dateCalendar");
+                $("#templates").addClass("templatesDivDarkMode").removeClass("templatesDiv");
+                darkMode = true;
+            }
+        }
+    </script>
+</body>

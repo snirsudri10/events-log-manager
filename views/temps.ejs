@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/bootstrap.min.js"></script>
+  <title>יומן הטסה</title>
+  <script src="/js/socket.io.js"></script>
+  <script src="/js/jQuery.min.js"></script>
+</head>
+
+<body>
+  <div class="container fluid-container">
+    <nav class="navbar navbar-dark bg-dark">
+      <div class="container-fluid" dir="rtl">
+        <a class="navbar-brand " href="#">
+          <img onclick="toggleDarkMode()" src="/images/116.png" alt="" width="35" height="35"
+            class="d-inline-block align-text-top">
+          יומן הטסה
+        </a>
+      </div>
+    </nav>
+    <br>
+    <% if(temps.length < 1 ){%>
+        <div class="input-group mb-3">
+            <input maxlength="6" type="text" class="form-control" name="temp[from]" placeholder="שם לשבלונה">
+            <div class="input-group-prepend">
+                <span class="input-group-text" id="basic-addon1">שם לשבלונה</span>
+            </div>
+        </div>
+        <div class="input-group mb-3">
+            <input type="text" class="form-control" name="temp[from]" placeholder="מאת">
+            <div class="input-group-prepend">
+                <span class="input-group-text" id="basic-addon1">מאת</span>
+            </div>
+        </div>
+        <div class="input-group mb-3">
+            <input type="text" class="form-control" name="temp[to]" placeholder="אל">
+            <div class="input-group-prepend">
+                <span class="input-group-text" id="basic-addon1">אל</span>
+            </div>
+        </div>
+        <div class="input-group mb-3">
+            <input type="text" class="form-control" name="temp[body]" placeholder="תוכן">
+            <div class="input-group-prepend">
+                <span class="input-group-text" id="basic-addon1">תוכן</span>
+            </div>
+        </div>
+        <div class="input-group mb-3">
+            <input type="text" class="form-control" name="temp[state]" placeholder="טיפול">
+            <div class="input-group-prepend">
+                <span class="input-group-text" id="basic-addon1">טיפול</span>
+            </div>
+        </div>
+        <div class="input-group mb-3" style="direction: rtl;">
+            <div class="input-group-prepend">
+                <span class="input-group-text" id="basic-addon1">סגירת יום</span>
+            </div>
+            <select name="temp[dayClosure]" id="">
+                <option value="yes">כן</option>
+                <option selected value="no">לא</option>
+            </select>
+        </div>
+        <div class="input-group mb-3"  style="direction: rtl;">
+            <div class="input-group-prepend">
+                <span class="input-group-text" id="basic-addon1">צבע</span>
+            </div>
+            <select required tabindex="6" name="temp[color]" id="colorInfo">
+                    <option value="#d82e3f">🟥</option>
+                    <option value="#c4aa16">🟨</option>
+                    <option value="#1d8d20">🟩</option>
+            </select>                
+        </div>
+    <%}else{%>
+        <%temps.forEach((temp)=>{ %>
+            <div class="input-group mb-3">
+                <input value="<%=temp.name%>" maxlength="6" type="text" class="form-control" name="temp[name]" placeholder="שם לשבלונה">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">שם לשבלונה</span>
+                </div>
+            </div>
+            <div class="input-group mb-3">
+                <input value="<%=temp.from%>" type="text" class="form-control" name="temp[from]" placeholder="מאת">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">מאת</span>
+                </div>
+            </div>
+            <div class="input-group mb-3">
+                <input value="<%=temp.to%>" type="text" class="form-control" name="temp[to]" placeholder="אל">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">אל</span>
+                </div>
+            </div>
+            <div class="input-group mb-3">
+                <input  value="<%=temp.body%>" type="text" class="form-control" name="temp[body]" placeholder="תוכן">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">תוכן</span>
+                </div>
+            </div>
+            <div class="input-group mb-3">
+                <input value="<%=temp.state%>" type="text" class="form-control" name="temp[state]" placeholder="טיפול">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">טיפול</span>
+                </div>
+            </div>
+            <div class="input-group mb-3" style="direction: rtl;">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">סגירת יום</span>
+                </div>
+                <select name="temp[dayClosure]" id="">
+                    <%if(temp.dayClosure){%>
+                        <option selected value="yes">כן</option>
+                        <option value="no">לא</option>
+                    <%}else{%>
+                        <option value="yes">כן</option>
+                        <option selected value="no">לא</option>
+                    <%}%>
+                </select>
+            </div>
+            <div class="input-group mb-3"  style="direction: rtl;">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">צבע</span>
+                </div>
+                <select required tabindex="6" name="temp[color]" id="colorInfo">
+                    <%if(temp.color == "#d82e3f"){%>
+                        <option selected value="#d82e3f">🟥</option>
+                        <option value="#c4aa16">🟨</option>
+                        <option value="#1d8d20">🟩</option>
+                    <%}else if(temp.color == "#c4aa16"){%>
+                        <option value="#d82e3f">🟥</option>
+                        <option selected value="#c4aa16">🟨</option>
+                        <option value="#1d8d20">🟩</option>
+                    <%}else{%>
+                        <option value="#d82e3f">🟥</option>
+                        <option value="#c4aa16">🟨</option>
+                        <option selected value="#1d8d20">🟩</option>
+                    <%}%>
+                </select>                
+            </div>
+        <%});%>
+
+    <%}%>
+    <div class="center">
+        <button class="btn btn-dark">שמור</button>
+        <button class="btn btn-dark">הוסף</button>
+    </div>
+  </div>
+
+</body>

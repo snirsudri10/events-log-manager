@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/bootstrap.min.js"></script>
+  <title>יומן הטסה</title>
+  <script src="/js/socket.io.js"></script>
+  <script src="/js/jQuery.min.js"></script>
+</head>
+
+<body>
+  <div class="container fluid-container">
+    <nav class="navbar navbar-dark bg-dark">
+      <div class="container-fluid" dir="rtl">
+        <a class="navbar-brand " href="#">
+          <img onclick="toggleDarkMode()" src="/images/116.png" alt="" width="35" height="35"
+            class="d-inline-block align-text-top">
+          יומן הטסה
+        </a>
+        <button onclick="window.location='/'" class="btn btn-dark">דף הבית</button>
+      </div>
+
+    </nav>
+    <%if(infos.length < 1 ){%>
+        <h1 style="text-align: center; color: white;">אין מידע לצבע המבוקש</h1>
+    <%}else{%>
+        <h1 style="text-align: center; color: white;"><%=infos[0].date%></h1>
+        
+        <div class="table-wrapper-scroll-y my-custom-scrollbar" style=" min-height: 72vh;">
+          <table class="table table-dark header-fixed table-striped mb-0" style="text-align: center;">
+            <thead>
+              <tr>
+                <th scope="col">סגירת יום</th>
+                <th scope="col">טיפול</th>
+                <th scope="col">תוכן</th>
+                <th scope="col">אל</th>
+                <th scope="col">מאת</th>
+                <th scope="col">שעה</th>
+              </tr>
+            </thead>
+            <tbody dir="rtl" id="tbodyData" style="min-height: 40em;">
+          
+              <% infos=infos.reverse();%>
+                <% infos.forEach((info)=>{ %>
+                  <tr style="background-color: <%=info.color%>" dir="ltr">
+                
+                    <td>
+                      <%if(info.dayClosure){%>
+                        <%="כן"%>
+                      <%}else{%>
+                          <%="לא"%>
+                      <%}%>
+                    </td>
+                    <td><%=info.state%></td>
+                    <td><%=info.body%></td>
+                    <td><%=info.to%></td>
+                    <td><%=info.from%></td>
+                    <td><%=info.time%></td>
+                  </tr>
+                  <%});%>
+            </tbody>
+          </table>
+      <%}%>
+  </div>
+
+  <script>
+    var darkMode = true;
+    function toggleDarkMode() {
+      if (darkMode) {
+        $("button").removeClass("btn-dark").addClass("btn-primary");
+        $("nav").removeClass("navbar-dark bg-dark").addClass("navbar-light bg-light");
+        $("table").removeClass("table-dark");
+        $("body").css({ "background-color": "white" });
+        $("#dateCalander").removeClass("dateCalendarDarkMode").addClass("dateCalendar");
+        $("#dateCalander").removeClass("dateCalendarDarkMode").addClass("dateCalendar");
+        $("#templates").removeClass("templatesDivDarkMode").addClass("templatesDiv");
+        $("h1").css({"color":"black"});
+        darkMode = false;
+      } else {
+        $("button").addClass("btn-dark").removeClass("btn-primary");
+        $("nav").addClass("navbar-dark bg-dark").removeClass("navbar-light bg-light");
+        $("table").addClass("table-dark");
+        $("body").css({ "background-color": "#2b2e31" });
+        $("#dateCalander").addClass("dateCalendarDarkMode").removeClass("dateCalendar");
+        $("#templates").addClass("templatesDivDarkMode").removeClass("templatesDiv");
+        $("h1").css({"color":"white"});
+
+        darkMode=true;
+      }
+    }
+
+    console.log($("tbody").children());
+
+    var turn = 0;
+    $("#tmplatesBtn").on("click", () => {
+      $("#dropDownImg").toggleClass("rotate");
+      if (turn % 2 == 0) {
+        $("#templates").addClass("showTemplates").removeClass("hideTemplates");
+      } else {
+        $("#templates").addClass("hideTemplates").removeClass("showTemplates");
+      }
+      turn++;
+    });
+
+    $(".inputInfo").css("background-color", $("#colorInfo").val());
+    $("#colorInfo").change(() => {
+      $(".inputInfo").css("background-color", $("#colorInfo").val());
+    });
+
+
+  </script>
+</body>
+
+</html>

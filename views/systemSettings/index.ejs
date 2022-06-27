@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/datatables.min.css">
+    <script src="/js/jQuery.min.js"></script>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/js/bootstrap.min.js"></script>
+    <title>יומן הטסה</title>
+
+
+    <style>
+         /* The switch - the box around the slider */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+
+/* Hide default HTML checkbox */
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* The slider */
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: #2196F3;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
+}
+
+/* Rounded sliders */
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+} 
+    </style>
+
+</head>
+
+<body>
+
+    <!--הודעות למשתמש-->
+
+
+
+    <div class="container fluid-container">
+
+        <div style="background-color: #212529; border-radius: 0 0 20px 20px;" class="jumbotron jumbotron-fluid">
+            <div class="container">
+                <h1 class="display-4 " style="text-align:center;">
+                    <a href="#" style="text-decoration: none;color: #ffffff;">הגדרות מערכת</a>
+                </h1>
+            </div>
+        </div>
+        
+        <% if((error && error.length > 0) || (success && success.length>0)){ %>
+            <%if(success && success.length>0){ %>
+                <div class="alert alert-success alert-dismissible fade show" dir="rtl" style="text-align:start;" role="alert">
+            <%} if(error && error.length > 0){ %>
+                <div class="alert alert-danger alert-dismissible fade show" dir="rtl" style="text-align:start;" role="alert">
+            <% } %>
+            <% if(error && error.length > 0){ %>
+                <%=error%>
+            <%} if(success && success.length>0){ %>
+                <%=success%>
+            <% } %>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+            </button>
+            </div>
+        <% } %>
+        <div style="display: flex; flex-direction: row; flex-wrap: wrap; justify-content: space-around;">
+            <div style="margin: 5px;">
+                <div class="card mb-3" style="width: 18rem; border-radius: 15px;">
+                    <h1 style="text-align: center;">מחלקות</h1>
+                    <div class="card-body">
+                      <h5 class="card-title" style="text-align: center;">מחלקות שנמצאות במערכת</h5>
+                      <ul class="list-group">
+                          <% if(systemSettings.departments.length > 0){ %>
+                            <% for(let i=0; i < systemSettings.departments.length; i++){ %>
+                                <div style="display: flex; direction: rtl;">
+                                    <div onclick="$('#<%=i%>b').toggle('fast');" style="width: 100%;">
+                                        <li style="text-align:start;" class="list-group-item"><%=systemSettings.departments[i]%></li>
+                                    </div>
+                                    <div>                                            
+                                        <form style="height: 100%;" action="/systemSettings/deleteDepartment/<%=systemSettings.departments[i]%>?_method=DELETE" method="post">
+                                            <button style="display: none; text-align: center; font-size: medium; height: 100%; vertical-align: bottom;" id="<%=i%>b" class="btn btn-sm btn-danger">&minus;</button>
+                                        </form>
+                                    </div>                                    
+                                    
+                                </div>
+                            <% } %>
+                          <% } %>
+                      </ul>
+                      <div style="display: flex; flex-direction: row; margin-top:15px">
+                        <div style="display: flex; justify-content: space-around; width: 100%;">
+                            <div style="width: 50%;">
+                                <a onclick="$('#department').toggle('fast');" class="btn btn-success btn-block" style="font-size: large;">&#43</a> <!--plus-->
+                            </div>
+                        </div>
+                      </div>
+                      <div id="department" style="margin-top: 1rem; display: none;">
+                        <form action="/systemSettings/addDepartment" method="post">
+                            <div style="display: flex;">
+
+                                <button class="btn btn-primary" type="submit">&ShortLeftArrow;</button>
+
+                                <input name="dept" type="text">
+                            </div>
+                        </form>
+                      </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin: 5px;">
+                <div class="card mb-3" style="width: 18rem; border-radius: 15px;">
+                    <h1 style="text-align: center;">אנשים</h1>
+                    <div class="card-body">
+                      <h5 class="card-title" style="text-align: center;">אנשים שנמצאים במערכת</h5>
+                      <ul class="list-group">
+                          <% if(systemSettings.people.length > 0){ %>
+                            <% for(let i=0; i < systemSettings.people.length; i++){ %>
+                                <div style="display: flex; direction: rtl;">
+                                    <div onclick="$('#<%=i%>p').toggle('fast');" style="width: 100%;">
+                                        <li style="text-align:start;" class="list-group-item"><%=systemSettings.people[i]%></li>
+                                    </div>
+                                    <div>                                            
+                                        <form style="height: 100%;" action="/systemSettings/deletePeople/<%=systemSettings.people[i]%>?_method=DELETE" method="post">
+                                            <button style="display: none; text-align: center; font-size: medium; height: 100%;" id="<%=i%>p" class="btn btn-sm btn-danger">&minus;</button>
+                                        </form>
+                                    </div>                                    
+                                    
+                                </div>
+                            <% } %>
+                          <% } %>
+                      </ul>
+                      <div style="display: flex; flex-direction: row; margin-top:15px">
+                        <div style="display: flex; justify-content: space-around; width: 100%;">
+                            <div style="width: 50%;">
+                                <a onclick="$('#people').toggle('fast');" class="btn btn-success btn-block" style="font-size: large;">&#43</a> <!--plus-->
+                            </div>
+                        </div>
+                      </div>
+                      <div id="people" style="margin-top: 1rem; display: none;">
+                        <form action="/systemSettings/addPeople" method="post">
+                            <div style="display: flex;">
+
+                                <button class="btn btn-primary" type="submit">&ShortLeftArrow;</button>
+
+                                <input name="people" type="text">
+                            </div>
+                        </form>
+                      </div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin: 5px;">
+                <div class="card mb-3" style="width: 18rem; border-radius: 15px;">
+                    <h1 style="text-align: center;">צבעים</h1>
+                    <div class="card-body">
+                      <h5 class="card-title" style="text-align: center;">צבעים שקיימים במערכת</h5>
+                      <ul class="list-group">
+                          <% if(systemSettings.colors.length > 0){ %>
+                            <% for(let i=0; i < systemSettings.colors.length; i++){ %>
+                                <div style="display: flex; direction: rtl; margin-bottom: 0.3rem;">
+                                    <div onclick="$('#<%=i%>c').toggle('fast');" style="width: 100%;">
+                                        <li style="height:100%; text-align:start; background-color:<%=systemSettings.colors[i]%>;" class="list-group-item"></li>
+                                    </div>
+                                    <div>                                            
+                                        <form style="height: 100%;" action="/systemSettings/deleteColor/<%=systemSettings.colors[i].slice(1)%>?_method=DELETE" method="post">
+                                            <button style="display: none; text-align: center; font-size: medium; height: 100%;" id="<%=i%>c" class="btn btn-sm btn-danger">&minus;</button>
+                                        </form>
+                                    </div>                                    
+                                </div>
+                                
+                            <% } %>
+                          <% } %>
+                      </ul>
+                      <div style="display: flex; flex-direction: row; margin-top:15px">
+                        <div style="display: flex; justify-content: space-around; width: 100%;">
+                            <div style="width: 50%;">
+                                <a onclick="$('#colorPicker').toggle('fast');" class="btn btn-success btn-block" style="font-size: large;">&#43</a> <!--&#43 is a plus sign-->
+                            </div>
+                        </div>
+                      </div>
+                      <div id="colorPicker" style="margin-top: 1rem; display: none;">
+                        <form action="/systemSettings/addColor" method="post">
+                            <div style="display: flex;">
+
+                                <button class="btn btn-primary" type="submit">&ShortLeftArrow;</button>
+
+                                <input id="ch" style="border-radius: 4px; height: 2.25em; width: 100%; margin:0; padding: 0; border: none;" name="color" type="color">
+                            </div>
+                        </form>
+                      </div>
+                    </div>
+                </div>
+            </div>
+            
+
+        </div>
+        <div style="display: flex; flex-direction: row; justify-content: center;">
+            <div style="display: flex; margin: 5px;">
+                <div class="card mb-3" style="width: 18rem; border-radius: 15px;">
+                    <h1 style="text-align: center;">מצב לילה</h1>
+                    <div class="card-body">
+                      <h5 class="card-title" style="text-align: center;">מצב לילה דיפולטיבי</h5>
+                      <div style="display: flex; justify-content: center;">
+                        <form id="darkModeForm" action="/systemSettings/darkMode" method="post">
+                            <select onchange="$('#darkModeForm').submit();" style="border: none; -webkit-appearance: none; background-color: transparent;" name="darkMode" id="">
+                                <% if(systemSettings.darkMode){ %>
+                                    <option selected value="true"><h2>🌚</h2></option>
+                                    <option value="false"><h2>🌝</h2></option>
+                                <% }else{ %>
+                                    <option value="true"><h2>🌚</h2></option>
+                                    <option selected value="false"><h2>🌝</h2></option>
+                                <%}%>
+                            </select>
+                        </form>
+                      </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+
+        <br>
+
+        <div class="center">
+            <a href="/" role="button" class="btn btn-primary">לטוס לדף הבית</a>
+        </div>
+    </div>
+
+    <script>
+        $("#1d").on('click',()=>{
+            $("#1b").toggle("slow");
+        });
+    </script>
+</body>
+</html>

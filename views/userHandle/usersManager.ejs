@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/datatables.min.css">
+
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/js/bootstrap.min.js"></script>
+    <title>יומן הטסה</title>
+
+</head>
+
+<body>
+    <div class="container fluid-container">
+
+        <div style="background-color: #212529; border-radius: 0 0 20px 20px;" class="jumbotron jumbotron-fluid">
+            <div class="container">
+                <h1 class="display-4 " style="text-align:center;">
+                    <a href="#" style="text-decoration: none;color: #ffffff;">ניהול משתמשים</a>
+                </h1>
+            </div>
+        </div>
+
+        <br>
+
+        <table class="table table-dark table-bordered" dir="rtl">
+            <thead>
+                <tr style="text-align: center;">
+                    <th scope="col">שם משתמש</th>
+                    <th scope="col">רמת גישה</th>
+                    <th scope="col">עריכת פרטים</th>
+                    <th scope="col">מחיקה</th>
+                </tr>
+            </thead>
+            <tbody dir="rtl">
+            <% users.forEach(function(user){ %>
+                <tr style="text-align: center;">
+                    <td><%= user.username %></td>
+                    <td><%= user.accessLvl %></td>
+                    <td><a href="/userHandle/editUser/<%=user.id%>" role="button" class="btn btn-primary">עריכה</a></td>
+                    <td>
+                        <form onsubmit="return confirm('האם אתה בטוח שאתה רוצה למחוק את המשתמש?')" action="/userHandle/deleteUser/<%=user.id%>?_method=DELETE" method="post">
+                            <button type="submit" role="button" class="btn btn-danger">מחיקת המשתמש </button>
+                        </form>
+                    </td>
+                </tr>
+            <% }); %>
+            </tbody>
+        </table>
+
+        <div class="center">
+            <a href="/" role="button" class="btn btn-primary">לטוס לדף הבית</a>
+            <a href="/userHandle/signUp" role="button" class="btn btn-primary">הוספת משתמש</a>
+
+        </div>
+    </div>
+</body>
+</html>

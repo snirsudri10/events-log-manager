@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/css/datatables.min.css">
+
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/bootstrap.min.js"></script>
+  <title>יומן הטסה</title>
+  <script src="/js/socket.io.js"></script>
+  <script src="/js/jQuery.min.js"></script>
+  <script src="/js/datatables.min.js"></script>
+  <script src="/js/moment.min.js"></script>
+
+</head>
+
+<body>
+  <!--הודעות למשתמש-->
+  <div class="container fluid-container">
+    <% if((error && error.length > 0) || (success && success.length>0)){ %>
+      <%if(success && success.length>0){ %>
+          <div class="alert alert-success alert-dismissible fade show" dir="rtl" style="text-align:start;" role="alert">
+      <%} if(error && error.length > 0){ %>
+          <div class="alert alert-danger alert-dismissible fade show" dir="rtl" style="text-align:start;" role="alert">
+      <% } %>
+      <% if(error && error.length > 0){ %>
+          <%=error%>
+      <%} if(success && success.length>0){ %>
+          <%=success%>
+      <% } %>
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+      </button>
+      </div>
+    <% } %>
+  </div>
+
+  <div class="container fluid-container">
+    <nav class="navbar navbar-dark bg-dark">
+      <div class="container-fluid" dir="rtl">
+        <a class="navbar-brand " href="#">
+          <img onclick="toggleDarkMode()" src="/images/116.png" alt="" width="35" height="35"
+            class="d-inline-block align-text-top">
+          יומן הטסה
+        </a>
+        <form style="padding-right: 11em;" action="searchText" method="POST">
+          <select name="whereToSearch" id="">
+            <option value="from">מאת</option>
+            <option value="to">אל</option>
+            <option value="body">תוכן</option>
+            <option value="state">טיפול</option>
+          </select>
+          <input name="textToSearch" placeholder="חפש לפי טקסט" type="text">
+          <button class="btn btn-dark">חפש</button>
+        </form>
+        <form action="/search" method="POST" class="d-flex">
+          <input name="date" id="dateCalander" max="<%=moment().local().format('YYYY-MM-DD')%>" class="form-control me-2 dateCalendarDarkMode" type="date"
+            placeholder="Search" aria-label="Search" value="<%=moment().local().format('YYYY-MM-DD')%>">
+          <button class="btn btn-dark" type="submit">חפש</button>
+          <button type="button" id="tmplatesBtn" class="btn btn-dark" style="margin-right: 0.1em;"><img class=""src="/images/dropdownArrow.svg" alt="" srcset="" id="dropDownImg"></button>
+        </form>
+      </div>
+    </nav>
+
+    <div id="templates" class="templatesDivDarkMode hideTemplates" dir="rtl">
+
+      <%if ( infos.length > 0 ){%>
+        <form action="/dayClosure" method="post">
+          <% var dateDayClosure = "" %>
+          <% if(search){ %>
+            <% dateDayClosure = searchedDate %>
+          <%}else{%>
+            <% dateDayClosure = moment().local().format("DD/MM/YYYY"); %>
+          <%}%>
+          <input hidden name="date" id="dayClosureInput" type="text" value="<%=dateDayClosure%>">
+          <button class="btn btn-dark">סגירת יום</button>
+        </form>
+
+        <div class="dropdown">
+          <button class="dropbtn btn btn-dark temp">סינון לפי צבע</button>
+          <div class="dropdown-content" >
+            <form action="/searchColor/d82e3f/<%=infos[0].date%>" method="post"><button style="border: none; width: 100%; background-color: rgba(0, 0, 0, 0.0);">🟥</button></form>
+            <form action="/searchColor/c4aa16/<%=infos[0].date%>" method="post"><button style="border: none; width: 100%; background-color: rgba(0, 0, 0, 0.0);">🟨</button></form>
+            <form action="/searchColor/1d8d20/<%=infos[0].date%>" method="post"><button style="border: none; width: 100%; background-color: rgba(0, 0, 0, 0.0);">🟩</button></form>
+          </div>
+        </div>
+
+        <button onclick="exportTable()" class="btn btn-dark temp">יצוא ל - excel</button>
+      <% } %>
+
+      <%if(!search && currentUser && currentUser.accessLvl < 3){%>
+        <div class="dropdown">
+          <button onclick="window.location = '/templates/manageTemps'" class="dropbtn btn btn-dark temp">שבלונות</button>
+          <div class="dropdown-content">
+            <%if(temps.length > 0){%>
+              <% temps.forEach((t)=>{ %>
+
+                <a onclick="putTemp('<%=t.id%>');" style="text-align: center; cursor: pointer;"><%=t.title%> <input hidden id="<%=t.id%>" type="text" value="<%=t%>"></a>
+              <% }); %>
+            <%}%>
+            <% if(currentUser && currentUser.accessLvl < 2){ %>
+              <a href="/templates/addTemp" style="text-align: center; cursor: pointer;"><img src="/images/add.svg" width="20em" height="20em" alt=""></a>
+            <%}%>
+          </div>
+        </div>
+      <%}%>
+
+      <% if(currentUser && currentUser.accessLvl < 2){ %>
+        <button onclick="window.location='/userHandle/viewUsers'" class="btn btn-dark temp">ניהול משתמשים</button>
+        <button onclick="window.location='/systemSettings/'" class="btn btn-dark temp">הגדרות מערכת</button>
+      <%}%>
+
+      <% if(!currentUser){ %>
+        <button onclick="window.location='/userHandle/signIn'" class="btn btn-dark temp">התחברות</button>
+      <%}else{%>
+        <button onclick="window.location='/userHandle/logout'" class="btn btn-dark temp">התנתקות</button>
+      <%}%>
+    </div>
+    
+    <%if(search){%>
+      <h1 style="text-align: center; color: white;"><%=searchedDate%></h1>
+    <%}%>
+
+    <div class="table-wrapper-scroll-y my-custom-scrollbar" style=" min-height: 72vh;">
+      <table id="table" class="table table-dark header-fixed table-striped mb-0" style="text-align: center;">
+        <thead>
+          <tr>
+            <th hidden scope="col">צבע</th>
+            <% if(currentUser && currentUser.accessLvl < 3) {%>
+              <th scope="col">אפשרוית</th>
+            <%}%>
+            <th scope="col">סגירת יום</th>
+            <th scope="col">טיפול</th>
+            <th scope="col">תוכן</th>
+            <th scope="col">אל</th>
+            <th scope="col">מאת</th>
+            <th scope="col">שעה</th>
+            <th hidden scope="col">תאריך</th>
+            <th hidden scope="col">נוסף על ידי</th>
+
+            
+          </tr>
+        </thead>
+        <tbody dir="rtl" id="tbodyData" style="min-height: 40em;">
+          <% infos=infos.reverse();%>
+            <% infos.forEach((info)=>{ %>
+
+              <tr style="background-color: <%=info.color%>" dir="ltr">
+                <% if(info.color == '#1d8d20'){%>
+                  <td hidden>ירוק</td>
+                <%}else if(info.color == '#c4aa16'){%>
+                  <td hidden>צהוב</td>
+                <%}else{%>
+                  <td hidden>אדום</td>
+                <%}%>
+                
+                <% if(currentUser && currentUser.accessLvl < 3) {%>
+                  <td>
+                    <div class="dropdown">
+                      <button class="dropbtn" style="background-color: rgba(0,0,0,0.0);"><img src="/images/dropdownArrow.svg" alt=""></button>
+                      <div class="dropdown-content">
+                        <a href="/edit/<%=info.id%>"><img src="/images/edit.svg" width="20em" height="20em" alt=""></a>
+                        <a onclick="if(confirm('בטוח/ה')){deleteTR('<%=info.id%>');}" role="button" href="#"><img src="/images/trash.svg"  width="20em" height="20em" alt=""></a>
+                      </div>
+                    </div> 
+                  </td>
+                <%}%>
+                <td>
+                  <%if(info.dayClosure){%>
+                    <%="כן"%>
+                  <%}else{%>
+                      <%="לא"%>
+                  <%}%>
+                </td>
+                <td><%=info.state%></td>
+                <td><%=info.body%></td>
+                <td><%=info.to%></td>
+                <td><%=info.from%></td>
+                <td><%=info.time%></td>
+                <td hidden><%=info.date%></td>
+                <td hidden><%=info.addedBy%></td>
+                
+              </tr>
+              <%});%>
+        </tbody>
+      </table>
+    </div>
+    <%if(!search && currentUser && currentUser.accessLvl < 3){%>
+    <div class="inputInfo p-2 b-3">
+        <form action="/infoEnter" onsubmit="sendData();return false;" method="POST" id="formInput">
+          <div class="input-group m-3 center">
+            <input tabindex="5" class="mr-1" placeholder="סגירת יום" style="width:1em" type="checkbox"
+              name="dayClosure" id="dayClosure">
+            <input value="" required tabindex="4" class="mr-1" placeholder="טיפול" style="width:16em"
+              type="text" name="state" id="state">
+            <input value="" required tabindex="3" class="mr-1" placeholder="תוכן"
+              style="width:16em" type="text" name="body" id="body">
+            <input value="" required tabindex="2" class="mr-1" placeholder="אל" style="width:8em"
+              type="text" name="to" id="to">
+            <input value="" required tabindex="1" class="mr-1" placeholder="מאת" style="width:8em"
+              type="text" name="from" id="from">
+            <input required class="mr-1" placeholder="" style="width:5em" type="datetime" name="time"
+              id="timeInput" value="">
+          </div>
+
+          <div class="input-group center">
+
+            <button style="background-color: #007bff; border-color: #007bff;" tabindex="8"
+              class="btn btn-primary" role="submit">שמור</button>
+
+            <select required tabindex="7" name="profession" id="">
+              <option value="AVIONICS">אוויוניקה</option>
+              <option value="ENG">מנועים</option>
+              <option value="LO">LO</option>
+              <option value="ELECTRIC">ח"ממ</option>
+              <option value="MECH">ממ"ס</option>
+              <option selected value="Debrief">תחקור</option>
+            </select>
+
+
+            <select required tabindex="6" name="color" id="colorInfo">
+              <option value="#d82e3f">🟥</option>
+              <option value="#c4aa16">🟨</option>
+              <option selected value="#1d8d20">🟩</option>
+            </select>
+
+          </div>
+        </form>
+    </div>
+    <%}%>
+  </div>
+
+
+  <script src="/js/FileSaver.min.js"></script>
+  <script src="/js/xlsx.min.js"></script>
+  <script src="/js/bootstrap.min.js"  type="text/javascript"></script>
+  <script>
+    var darkMode = true;
+    var updateTime = () => {
+      $("#timeInput").val(getTimeNow());
+    }
+    setInterval(() => { updateTime() }, 30000);
+
+    function getTimeNow(){
+      return moment().local().format("HH:mm");
+    }
+    $("#timeInput").val(getTimeNow());
+
+
+    function toggleDarkMode() {
+      if (darkMode) {
+        $("button").removeClass("btn-dark").addClass("btn-primary");
+        $("nav").removeClass("navbar-dark bg-dark").addClass("navbar-light bg-light");
+        $("table").removeClass("table-dark");
+        $("body").css({ "background-color": "white" });
+        $("#dateCalander").removeClass("dateCalendarDarkMode").addClass("dateCalendar");
+        $("#dateCalander").removeClass("dateCalendarDarkMode").addClass("dateCalendar");
+        $("#templates").removeClass("templatesDivDarkMode").addClass("templatesDiv");
+        darkMode = false;
+      } else {
+        $("button").addClass("btn-dark").removeClass("btn-primary");
+        $("nav").addClass("navbar-dark bg-dark").removeClass("navbar-light bg-light");
+        $("table").addClass("table-dark");
+        $("body").css({ "background-color": "#2b2e31" });
+        $("#dateCalander").addClass("dateCalendarDarkMode").removeClass("dateCalendar");
+        $("#templates").addClass("templatesDivDarkMode").removeClass("templatesDiv");
+        darkMode=true;
+      }
+    }
+
+    console.log($("tbody").children());
+
+    var turn = 0;
+    $("#tmplatesBtn").on("click", () => {
+      $("#dropDownImg").toggleClass("rotate");
+      if (turn % 2 == 0) {
+        $("#templates").addClass("showTemplates").removeClass("hideTemplates");
+      } else {
+        $("#templates").addClass("hideTemplates").removeClass("showTemplates");
+      }
+      turn++;
+    });
+
+    $(".inputInfo").css("background-color", $("#colorInfo").val());
+    $("#colorInfo").change(() => {
+      $(".inputInfo").css("background-color", $("#colorInfo").val());
+    });
+    const socket = io("http://172.20.10.6:3000");
+
+    socket.on("append", (data) => {
+      var displayDayClosure;
+
+      if (data.dayClosure) {
+        displayDayClosure = "כן";
+      } else {
+        displayDayClosure = "לא";
+      }
+      var tr = createTR(data);
+      $("#tbodyData").prepend(tr);
+      console.log(tr);
+    });
+
+    socket.on("delete",()=>{
+      console.log("deleting");
+      window.location.reload();
+    });
+
+    socket.on("update",(date)=>{
+      console.log("date in index.ejs is: "+date);
+      var todayDate =  moment().local().format("DD/MM/YYYY");
+      console.log("and todays date is: "+todayDate)
+      if(date === todayDate){
+        alert("הנתונים עדכונו לדף זה");
+        window.location.reload();
+      }
+    });
+    /*
+      the function creates tr with the new data and return it
+      input:object data
+      output:html tr element
+    */
+    function createTR(data){
+      var displayDayClosure;
+      if (data.dayClosure) {
+        displayDayClosure = "כן";
+      } else {
+        displayDayClosure = "לא";
+      }
+
+      var displayColor;
+       if(data.color == '#1d8d20'){
+        var displayColor = "ירוק";
+      }else if(data.color == '#c4aa16'){
+        var displayColor = "צהוב";
+      }else{
+        var displayColor = "אדום";
+      }
+
+      var tr = document.createElement("tr");
+      tr.style = "background-color:"+data.color+";";
+      tr.dir = "ltr";
+      var td1 = document.createElement("td");
+      var div1 = document.createElement("div");
+      div1.className = "dropdown";
+      var button1 = document.createElement("button");
+      button1.className="dropbtn";
+      button1.style = "background-color: rgba(0,0,0,0.0);";
+      var img1 = document.createElement("img");
+      img1.src = "/images/dropdownArrow.svg";
+      img1.alt="";
+      button1.appendChild(img1);
+      div1.appendChild(button1);
+
+      var div2 = document.createElement("div");
+      div2.className = "dropdown-content";
+      var a1 = document.createElement("a");
+      a1.href = "/edit/"+data._id;
+      var img2 = document.createElement("img");
+      img2.src="/images/edit.svg";
+      img2.alt="";
+      img2.width="20";
+      img2.height="20";
+      a1.appendChild(img2);
+      div2.appendChild(a1);
+      var a2 = document.createElement("a");
+      a2.onclick=()=>{if(confirm('בטוח/ה')){deleteTR(data._id);}};
+      a2.role="button";
+      a2.href="#";
+      var img3 = document.createElement("img");
+      img3.src="/images/trash.svg";
+      img3.alt="";
+      img3.width="20"; 
+      img3.height="20";
+      a2.appendChild(img3);
+      div2.appendChild(a2);
+      div1.appendChild(div2);
+      td1.appendChild(div1);
+      
+
+      var td0 = document.createElement("td");
+      td0.textContent = displayColor;
+      td0.style="display:none";
+      tr.appendChild(td0);
+
+      tr.appendChild(td1);
+      var td2 = document.createElement("td");
+      td2.textContent = displayDayClosure;
+      tr.appendChild(td2);
+      var td3 = document.createElement("td");
+      td3.textContent = data.state;
+      tr.appendChild(td3);
+      var td4 = document.createElement("td");
+      td4.textContent = data.body;
+      tr.appendChild(td4);
+      var td5 = document.createElement("td");
+      td5.textContent = data.to;
+      tr.appendChild(td5);
+      var td6 = document.createElement("td");
+      td6.textContent = data.from;
+      tr.appendChild(td6);
+      var td7 = document.createElement("td");
+      td7.textContent = data.time;
+      tr.appendChild(td7);
+      var td8 = document.createElement("td");
+      td8.textContent = data.date;
+      td8.style="display:none";
+      tr.appendChild(td8);
+      var td9 = document.createElement("td");
+      td9.textContent = data.addedBy;
+      td9.style="display:none";
+      tr.appendChild(td9);
+      return tr;
+    }
+
+
+    function deleteTR(id){
+      socket.emit("delete",id);
+    }
+
+
+    function exportTable(){
+      html_table_to_excel('xlsx');
+    }
+
+    function html_table_to_excel(type){
+        var data = document.getElementById('table');
+
+        var file = XLSX.utils.table_to_book(data, {sheet: "sheet1"});
+
+        XLSX.write(file, { bookType: type, bookSST: true, type: 'base64' });
+
+        XLSX.writeFile(file, 'file.' + type);
+    }
+
+    function putTemp(data){
+      var o = {}
+      var v = $("#"+data).val();
+      v = v.split(","); //creating array from obj
+      v[0] = v[0].slice(3);
+      v[v.length-1] = v[v.length-1].slice(0,-1);
+      for (let i = 1; i < v.length; i++) {
+        v[i] = v[i].slice(2);
+        o[v[i].split(":")[0]] = v[i].replaceAll("'","").replace(" ","").split(":")[1];
+      }
+      console.log(v);
+      console.log(o);
+      $("#from").val(o['from']);
+      $("#to").val(o['to']);
+      $("#body").val(o['body']);
+      $("#state").val(o['state']);
+      if(o['dayClosure'] == "true"){
+        $("#dayClosure").prop("checked",true);
+      }else{
+        $("#dayClosure").prop("checked",false);
+      }
+      $("#colorInfo").val(o['color']).change()
+    }
+
+
+    const sendData = () => {
+      var obj = {}
+      var data = $("#formInput").serialize(); //getting the input from the form and serializing it so it can be send
+      data = decodeURI(data); 
+      var arr = data.split("&"); //spliting the serialized data to an array
+      console.log(arr);
+      arr.forEach((item) => { //for each item in the array (for each value) decoding it with speacial symbols such as '#' ':'
+        var a = item.split("=");
+        a[0] = decodeURIComponent(a[0]);
+        a[1] = decodeURIComponent(a[1]);
+        if (a[0] == "dayClosure") { //turning specific value to a boolean
+          a[1] = true;
+        }
+        obj[a[0]] = a[1];
+      });
+      obj.date = moment().local().format("DD/MM/YYYY");
+      obj.addedBy = "<%=currentUser.username%>";
+
+      //console.log(obj);
+      socket.emit("append", obj);
+    }
+
+  //disable might use it later
+  //  $("#table").DataTable({
+  //   "searching":false,
+  //   "lengthChange": false,
+  //   "paging":false,
+  //   "info":false,
+  //   "scrollCollapse": true,
+  //  });
+  $('.alert').alert();
+
+  </script>
+            
+
+</body>
+
+</html>
